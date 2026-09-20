@@ -1,0 +1,18 @@
+@echo off
+setlocal
+set "PROJECT=C:\Users\Belka\ultimate-music-sync"
+set "LOG=%PROJECT%\.real-state\hourly-sync.log"
+if not exist "%PROJECT%\.real-state" mkdir "%PROJECT%\.real-state"
+cd /d "%PROJECT%"
+"%PROJECT%\.venv\Scripts\python.exe" -m ultimate_music_sync.hourly_sync >> "%LOG%" 2>&1
+set "SYNC_EXIT=%ERRORLEVEL%"
+rem Acquisition is offline-safe: it uses the last-good saved snapshot when the
+rem Spotify sync fails, and the lock guard prevents overlapping runs.
+"%PROJECT%\.venv\Scripts\python.exe" -m ultimate_music_sync.auto_acquire >> "%LOG%" 2>&1
+set "ACQ_EXIT=%ERRORLEVEL%"
+if "%SYNC_EXIT%"=="0" (
+  python "%USERPROFILE%\Navidrome\tools\local_library.py" >> "%LOG%" 2>&1
+  "%USERPROFILE%\Navidrome\navidrome.exe" scan --configfile "%USERPROFILE%\Navidrome\navidrome.toml" --nobanner >> "%LOG%" 2>&1
+)
+if not "%ACQ_EXIT%"=="0" exit /b %ACQ_EXIT%
+exit /b %SYNC_EXIT%

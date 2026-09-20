@@ -1,0 +1,40 @@
+# --- state / runtime (never publish) ---
+.real-state/
+.smoke-state/
+*.sqlite
+*.sqlite.bak-*
+*.lock
+acquire-fallback*.log
+dotify-*.log
+auto-acquire.log
+hourly-sync.log
+lrc-fill-run.log
+*-results.csv
+fallback-remaining.csv
+spotify-*-tracks.csv
+yt-cookies.txt
+yt-dlp-archive.txt
+quarantine/
+
+# --- credentials / secrets (NEVER publish) ---
+*.token
+token
+cookies.txt
+credentials.json
+*.env
+.env
+auth.json
+
+# --- python ---
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+
+# --- os ---
+Thumbs.db
+.DS_Store
