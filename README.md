@@ -63,7 +63,7 @@ Spotify liked ──▶ reconcile ──▶ Dotify (own account, vorbis-high)
 ## Install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/music-server-suite
+git clone https://github.com/belkaboi/music-server-suite
 cd music-server-suite
 python -m venv .venv
 # Windows:

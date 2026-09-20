@@ -11,7 +11,7 @@ dependencies = ["mutagen>=1.47,<2"]
 dev = ["pytest>=8"]
 
 [project.urls]
-Homepage = "https://github.com/YOUR_USERNAME/music-server-suite"
+Homepage = "https://github.com/belkaboi/music-server-suite"
 
 [project.scripts]
 ums = "ultimate_music_sync.cli:main"
