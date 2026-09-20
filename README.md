@@ -71,6 +71,17 @@ Spotify liked ──▶ reconcile ──▶ Dotify (own account, vorbis-high)
 
 ## Install
 
+### Option A — prebuilt control panel (recommended)
+
+Go to [Actions → build](https://github.com/belkaboi/music-server-suite/actions/workflows/build.yml),
+run it (or push a `v*` tag), and download the panel binary for your platform
+from the workflow artifacts / release: `music-control-panel-windows-x64.zip`,
+`music-control-panel-macos-arm64.zip`, or `music-control-panel-linux-x64.zip`.
+Run the binary — no Python needed for the panel. (The sync pipeline itself
+still needs Python + yt-dlp.)
+
+### Option B — from source
+
 ```bash
 git clone https://github.com/belkaboi/music-server-suite
 cd music-server-suite
