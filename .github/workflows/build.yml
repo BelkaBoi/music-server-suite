@@ -1,0 +1,92 @@
+name: build
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build-panel:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact: music-control-panel-windows-x64.zip
+            exe: music-control-panel.exe
+            inner: dist/music-control-panel.exe
+          - os: macos-latest
+            artifact: music-control-panel-macos-arm64.zip
+            exe: music-control-panel
+            inner: dist/music-control-panel
+          - os: ubuntu-latest
+            artifact: music-control-panel-linux-x64.zip
+            exe: music-control-panel
+            inner: dist/music-control-panel
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller mutagen
+
+      - name: Build panel binary
+        working-directory: control-center
+        run: >
+          pyinstaller --noconfirm --clean --windowed --onefile
+          --name music-control-panel
+          --collect-submodules ultimate_music_sync
+          server_control.py
+
+      - name: Prepare staging (README + LICENSE)
+        shell: bash
+        run: |
+          mkdir -p staging
+          cp control-center/${{ matrix.inner }} staging/
+          cp README.md LICENSE staging/
+
+      - name: Zip (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Compress-Archive -Path staging/* -DestinationPath ${{ matrix.artifact }}
+
+      - name: Zip (macOS/Linux)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          cd staging
+          chmod +x ${{ matrix.exe }}
+          zip ../${{ matrix.artifact }} *
+          cd ..
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}
+
+  release:
+    needs: build-panel
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          path: release
+
+      - name: Attach to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*.zip
+          generate_release_notes: true

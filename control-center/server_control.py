@@ -591,7 +591,7 @@ class ControlCenter(tk.Tk):
 
     def _build_ui(self) -> None:
         # Scrollable shell: canvas + vertical scrollbar + inner content frame.
-        shell = ttk.Frame(self, style="TFrame")
+        shell = ttk.Frame(self, style="TFrame", padding=(0, 0, 14, 0))
         shell.pack(fill="both", expand=True)
         canvas = tk.Canvas(shell, bg="#10131a", highlightthickness=0, borderwidth=0)
         scrollbar = ttk.Scrollbar(shell, orient="vertical", command=canvas.yview)

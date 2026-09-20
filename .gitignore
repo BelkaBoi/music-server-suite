@@ -38,3 +38,10 @@ build/
 # --- os ---
 Thumbs.db
 .DS_Store
+
+# --- build/screenshot artifacts ---
+dist/
+build/
+music-control-panel.spec
+panel-state.json
+*.png.bak

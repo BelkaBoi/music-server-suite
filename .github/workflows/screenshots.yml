@@ -1,0 +1,44 @@
+name: Screenshots
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  screenshots:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller mutagen pillow
+
+      - name: Build panel binary
+        working-directory: control-center
+        run: >
+          pyinstaller --noconfirm --clean --windowed --onefile
+          --name music-control-panel
+          --collect-submodules ultimate_music_sync
+          server_control.py
+
+      - name: Capture panel screenshots (mock-backed)
+        shell: pwsh
+        run: |
+          python docs/capture-screenshots.py
+
+      - name: Commit screenshots
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/screenshots
+          git diff --cached --quiet || git commit -m "Update control panel screenshots"
+          git push

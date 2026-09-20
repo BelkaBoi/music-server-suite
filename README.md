@@ -22,6 +22,8 @@ Spotify liked ──▶ reconcile ──▶ Dotify (own account, vorbis-high)
               desktop control panel (tkinter)
 ```
 
+![Control panel](docs/screenshots/control-panel.png)
+
 ## What's inside
 
 | Path | What it is |
