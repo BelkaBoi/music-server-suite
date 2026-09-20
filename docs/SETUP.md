@@ -81,7 +81,28 @@ Reading `cloudflared-health.log`: each line carries per-probe
 `1010` = WAF blocked the probe signature (use a browser UA), `502` = edge OK
 but origin unreachable.
 
-## 6. Control panel
+## 6. AI DJ daily playlist (ListenBrainz / Stats.fm)
+
+1. Get a free ListenBrainz account and set `LISTENBRAINZ_USER`
+   (optionally `LISTENBRAINZ_TOKEN` for private data).
+2. Optional taste reference: export your Stats.fm top tracks and run
+   `python tools/import_statsfm.py your-export.csv`.
+3. Schedule the chain daily (Windows):
+
+   ```
+   schtasks /create /tn "Navidrome\DailyAI-DJ" /sc daily /st 09:00 /tr ^
+     "wscript.exe C:\path\to\silent-music-automation.vbs"
+   ```
+
+   The chain: library inventory → ListenBrainz recommendations →
+   import-candidate diff → DJ scoring → 8-hour `AI DJ - Daily.m3u8`
+   (60% familiar / 40% discovery) written into the library's `Playlists/`
+   folder → targeted Navidrome playlist rescan.
+
+4. Missing recommended tracks land in `listenbrainz-import-candidates.csv`,
+   which the acquisition pipeline can consume.
+
+## 7. Control panel
 
 ```bash
 python control-center/server_control.py
@@ -93,7 +114,7 @@ buttons for Start/Stop/Restart/Sync Now/Acquire Now/log shortcuts, and
 autostart/automation toggles. Acquire Now auto-refreshes every 15 s while the
 run holds the lock.
 
-## 7. Troubleshooting quick reference
+## 8. Troubleshooting quick reference
 
 | Symptom | Likely cause / fix |
 |---|---|

@@ -17,6 +17,8 @@ Spotify liked ──▶ reconcile ──▶ Dotify (own account, vorbis-high)
                      ▼
         library + .lrc sidecars ──▶ Navidrome ──▶ Cloudflare Tunnel
                      │
+             ListenBrainz / Stats.fm ──▶ AI DJ daily playlist (M3U)
+                     │
               desktop control panel (tkinter)
 ```
 
@@ -26,7 +28,7 @@ Spotify liked ──▶ reconcile ──▶ Dotify (own account, vorbis-high)
 |---|---|
 | `src/ultimate_music_sync/` | Core library: reconcile, acquisition, lyrics, state DB |
 | `control-center/` | Desktop control panel (tkinter) + tests |
-| `tools/` | Silent launchers, tunnel health watchdog, node rotation |
+| `tools/` | Silent launchers, tunnel health watchdog, node rotation, ListenBrainz/AI-DJ generators |
 | `tests/` | Core test suite |
 | `docs/` | Setup and operations guide |
 
@@ -43,6 +45,11 @@ Spotify liked ──▶ reconcile ──▶ Dotify (own account, vorbis-high)
   with bot-wall circuit breaking and optional cookie file support.
 - **Synced lyrics** — LRCLIB `.lrc` sidecars for every download and a
   whole-library backfill (synced preferred, plain-only gaps stay retryable).
+- **AI DJ playlist** — a daily ~8-hour M3U playlist generated from your
+  listening history: ~60% familiar tracks / 40% discovery, pulled from
+  ListenBrainz recommendations (plus optional Stats.fm top-tracks import),
+  cross-checked against your library, written straight into Navidrome's
+  playlist folder and picked up by a targeted rescan.
 - **Control panel** — status pills, colored health states, live acquisition
   progress, one-click actions, responsive layout at any window size, DPI
   aware, cross-platform.
@@ -86,6 +93,10 @@ defaults):
 | `SPOTIFY_TOKEN_FILE` | `<tools>/spotify-token.json` | Spotify OAuth token |
 | `DOTIFY_BIN` | dotify on PATH | Dotify/Zotify executable |
 | `DOTIFY_STATE` | `~/.dotify` | Dotify state directory |
+| `LISTENBRAINZ_USER` | — | Your ListenBrainz username (AI DJ) |
+| `LISTENBRAINZ_TOKEN` | — | ListenBrainz auth token (optional) |
+| `STATSFM_USER` | — | Stats.fm username (optional taste reference) |
+| `NAVIDROME_DB` | `<base>/data/navidrome.db` | Navidrome DB path (play-history scoring) |
 
 Spotify API access needs your own
 [Spotify developer app](https://developer.spotify.com/dashboard) credentials
@@ -125,6 +136,31 @@ yt-dlp --cookies-from-browser chrome --cookies .real-state/yt-cookies.txt --simu
 ```
 
 `acquire.py` picks up `.real-state/yt-cookies.txt` automatically.
+
+## AI DJ & listening integrations
+
+The `tools/` directory includes a daily-mix generator that turns your listening
+history into a ready-to-play Navidrome playlist:
+
+1. **`local_library.py`** — builds a tagged inventory CSV of the library
+   (artist/album/title/year) for matching.
+2. **`listenbrainz_recommendations.py`** — fetches your personal recommendations
+   from ListenBrainz (`LISTENBRAINZ_USER`, optional `LISTENBRAINZ_TOKEN`).
+3. **`listenbrainz_import_queue.py`** — diffs recommendations against the
+   library and writes an import-candidates CSV (also feeds the acquisition
+   pipeline's missing-track list).
+4. **`import_statsfm.py`** — optional Stats.fm export import as an extra
+   taste-reference source.
+5. **`spotify_dj_recommender.py`** — scores candidate tracks against your
+   Navidrome play history and Stats.fm top tracks.
+6. **`build_ai_dj_channel.py`** — assembles the final ~8-hour M3U
+   (`AI DJ - Daily`) with a 60/40 familiar/discovery split and writes a JSON
+   summary (track counts, duration target, mix ratios).
+7. **`music-automation.cmd`** — runs the whole chain silently and triggers a
+   Navidrome playlist rescan; schedule it daily.
+
+Set `LISTENBRAINZ_USER` (and optionally `LISTENBRAINZ_TOKEN`), optionally
+`STATSFM_USER`, then run `tools/music-automation.cmd` (adapt paths) daily.
 
 ## Platform notes
 
