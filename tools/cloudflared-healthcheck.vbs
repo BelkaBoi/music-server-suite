@@ -64,7 +64,7 @@ If Not flclashRunning Then
 End If
 
 ' --- repair 2: queue a connector restart (never blocks) ---
-shell.Run "powershell -NoProfile -Command Restart-Service cloudflared", 0, False
+shell.Run "powershell.exe -NoProfile -WindowStyle Hidden -Command ""Restart-Service cloudflared""", 0, True
 WScript.Sleep 15000
 
 ' --- verify recovery with the same instrumented probes ---
@@ -82,22 +82,16 @@ stream.Close
 
 ' --- repair 3: if still unhealthy, rotate VPN node once and try again ---
 If healthy < 3 Then
-    Dim rotOut, rotated
+    Dim rotated
     rotated = False
     On Error Resume Next
-    Set rotOut = shell.Exec("powershell -NoProfile -ExecutionPolicy Bypass -File """ & scriptDir & "\rotate-vpn-node.ps1""")
-    Do While rotOut.Status = 0
-        WScript.Sleep 500
-    Loop
-    If Err.Number = 0 Then
-        rotated = True
-        repair = repair & " rotated:" & Trim(rotOut.StdOut.ReadAll())
-    End If
+    shell.Run "powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File """ & scriptDir & "otate-vpn-node.ps1""", 0, True
+    If Err.Number = 0 Then rotated = True
     Err.Clear
     On Error GoTo 0
 
     If rotated Then
-        shell.Run "powershell -NoProfile -Command Restart-Service cloudflared", 0, False
+        shell.Run "powershell.exe -NoProfile -WindowStyle Hidden -Command ""Restart-Service cloudflared""", 0, True
         WScript.Sleep 15000
         healthy = 0
         detail = ""
